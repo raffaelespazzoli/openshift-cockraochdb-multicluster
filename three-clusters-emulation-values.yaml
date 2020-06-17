@@ -1,0 +1,35 @@
+namespaces:
+  - cockroachdb-1
+  - cockroachdb-2
+  - cockroachdb-3
+conf:
+  join: 
+    - cockroachdb-0.cockroachdb.cockroachdb-1.svc
+    - cockroachdb-1.cockroachdb.cockroachdb-1.svc
+    - cockroachdb-2.cockroachdb.cockroachdb-1.svc
+    - cockroachdb-0.cockroachdb.cockroachdb-2.svc
+    - cockroachdb-1.cockroachdb.cockroachdb-2.svc
+    - cockroachdb-2.cockroachdb.cockroachdb-2.svc
+    - cockroachdb-0.cockroachdb.cockroachdb-3.svc
+    - cockroachdb-1.cockroachdb.cockroachdb-3.svc
+    - cockroachdb-2.cockroachdb.cockroachdb-3.svc
+fullnameOverride: cockroachdb
+statefulset:
+  replicas: 3
+podAffinity:
+  preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/component: cockroachdb
+            app.kubernetes.io/instance: cockroachdb
+            app.kubernetes.io/name: cockroachdb
+        topologyKey: failure-domain.beta.kubernetes.io/zone
+
+tls:
+  enabled: no
+  certs:
+    provided: yes
+    tlsSecret: yes
+    nodeSecret: cockroachdb-tls

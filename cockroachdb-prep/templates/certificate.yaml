@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ template "cockroachdb-prep.fullname" . }}
+spec:
+  # Secret names are always required.
+  secretName: {{ template "cockroachdb-prep.fullname" . }}-tls
+  commonName: {{ template "cockroachdb-prep.fullname" . }}
+  usages:
+    - server auth
+    - client auth  
+  dnsNames:
+{{- $fullname := .Values.fullnameOverride -}}
+{{- $namespace := .Release.Namespace  -}}            
+{{- range until (int .Values.statefulset.replicas) }}
+  - {{ $fullname }}-{{ . }}.{{ $fullname }}
+  - {{ $fullname }}-{{ . }}.{{ $fullname }}.{{ $namespace }}.svc
+  - {{ $fullname }}-{{ . }}.{{ $fullname }}.{{ $namespace }}.svc.cluster.local
+{{- end }}
+  issuerRef:
+    name: internal-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
