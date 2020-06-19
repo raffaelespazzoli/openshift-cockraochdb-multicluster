@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-utils-operator.redhat-cop.io/destinationCA-from-secret: {{ template "cockroachdb-prep.fullname" . }}-tls
+  name: {{ template "cockroachdb-prep.fullname" . }}
+spec:
+  port:
+    targetPort: http
+  tls:
+    termination: reencrypt
+  to:
+    kind: Service
+    name: {{ template "cockroachdb-prep.fullname" . }}-public

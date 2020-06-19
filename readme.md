@@ -38,6 +38,13 @@ oc new-project cert-manager
 oc apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.yaml
 ```
 
+Deploy cert-utils operator
+
+```shell
+oc new-project cert-utils-operator
+oc apply -f ./cert-utils-operator.yaml
+```
+
 Create namespaces
 
 ```shell
@@ -84,4 +91,14 @@ helm template cockroachdb ./cockroachdb -n cockroachdb-3 -f three-clusters-emula
 export tools_pod=$(oc get pods -n cockroachdb-1 | grep tools | awk '{print $1}')
 oc exec $tools_pod -c tools -n cockroachdb-1 -- /cockroach/cockroach init --certs-dir=/crdb-certs --host cockroachdb-0.cockroachdb
 oc exec $tools_pod -c tools -n cockroachdb-1 -- /cockroach/cockroach node status --certs-dir=/crdb-certs --host cockroachdb-0.cockroachdb
+oc exec $tools_pod -c tools -n cockroachdb-1 -- /cockroach/cockroach sql --execute='CREATE USER raffa WITH PASSWORD raffa;' --certs-dir=/crdb-certs --host cockroachdb-0.cockroachdb
 ```
+
+Connecting to the ui
+
+```shell
+export ui_url=$(oc get route cockroachdb -n cockroachdb-1 -o jsonpath='{.spec.host}')
+echo $ui_url
+```
+
+connect to $ui_url user raffa/raffa
