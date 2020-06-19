@@ -5,7 +5,7 @@ metadata:
 spec:
   # Secret names are always required.
   secretName: {{ template "cockroachdb-prep.fullname" . }}-tls
-  commonName: {{ template "cockroachdb-prep.fullname" . }}
+  commonName: node
   usages:
     - server auth
     - client auth  

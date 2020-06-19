@@ -28,7 +28,7 @@ podAffinity:
         topologyKey: failure-domain.beta.kubernetes.io/zone
 
 tls:
-  enabled: no
+  enabled: yes
   certs:
     provided: yes
     tlsSecret: yes
