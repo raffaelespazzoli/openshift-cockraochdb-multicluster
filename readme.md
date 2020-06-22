@@ -165,16 +165,37 @@ oc login -u kubeadmin -p ${pwd3} --insecure-skip-tls-verify=true ${apiurl3}
 export context_cluster3=$(oc config current-context)
 ```
 
+## Prepare nodes for submariner
+
+```shell
+git clone https://github.com/submariner-io/submariner
+
+for context in ${context_cluster1} ${context_cluster2} ${context_cluster3}; do
+  cluster_id=$(oc --context ${context} get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
+  cluster_region=$(oc --context ${context} get infrastructure cluster -o jsonpath='{.status.platformStatus.aws.region}')
+  echo $cluster_id $cluster_region
+  mkdir -p /tmp/${cluster_id}
+  cp -R ./submariner/tools/openshift/ocp-ipi-aws/* /tmp/${cluster_id}
+  sed -i "s/\"cluster_id\"/\"${cluster_id}\"/g" /tmp/${cluster_id}/main.tf
+  sed -i "s/\"aws_region\"/\"${cluster_region}\"/g" /tmp/${cluster_id}/main.tf
+  pushd /tmp/${cluster_id}
+  terraform init -upgrade=true
+  terraform apply
+  popd
+  oc --context=${context} apply -f /tmp/${cluster_id}/submariner-gw-machine*.yaml
+done
+```
+
 ## Deploy submariner
 
 ```shell
-git clone https://github.com/submariner-io/submariner-charts
+helm repo add submariner-latest https://submariner-io.github.io/submariner-charts/charts
 ```
 
 Deploy the broker
 
 ```shell
-helm update submariner-broker ./submariner-charts/submariner-k8s-broker --kube-context ${context_cluster_control} -i --create-namespace -f ./values-sm-broker.yaml -n submariner-broker
+helm update submariner-broker submariner-latest/submariner-k8s-broker --kube-context ${context_cluster_control} -i --create-namespace -f ./values-sm-broker.yaml -n submariner-broker
 ```
 
 Deploy submariner
@@ -182,11 +203,12 @@ Deploy submariner
 ```shell
 export broker_api=$(oc --context ${context_cluster_control} get infrastructure cluster -o jsonpath='{.status.apiServerURL}')
 export broker_ca=$(oc --context ${context_cluster_control} get secret $(oc --context ${context_cluster_control} get sa default -n default -o yaml | grep token | awk '{print $3}') -n default -o jsonpath='{.data.ca\.crt}' | base64 -d | sed 's/^/    /')
+export broker_token=$(oc --context ${context_cluster_control} get secret $(oc --context ${context_cluster_control} get sa submariner-broker-client -n submariner-broker -o yaml | grep token | awk '{print $3}') -n submariner-broker -o jsonpath='{.data.token}' | base64 -d)
 for context in ${context_cluster1} ${context_cluster2} ${context_cluster3}; do
   cluster_cidr=$(oc --context ${context} get network cluster -o jsonpath='{.status.clusterNetwork[0].cidr}')
   cluster_service_cidr=$(oc --context ${context} get network cluster -o jsonpath='{.status.serviceNetwork[0]}')
-  cluster_service_cidr=$(oc --context ${context} get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
-
-  helm update submariner ./submariner-charts/submariner --kube-context ${context} -i --create-namespace -f ./values-sm.yaml -n submariner
+  cluster_id=$(oc --context ${context} get infrastructure cluster -o jsonpath='{.status.infrastructureName}')
+  envsubst < values-sm.yaml > /tmp/values-sm.yaml
+  helm update submariner submariner-latest/submariner --kube-context ${context} -i --create-namespace -f /tmp/values-sm.yaml -n submariner
 done
 ```
