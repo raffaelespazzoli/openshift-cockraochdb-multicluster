@@ -1,0 +1,31 @@
+{{- range .Values.clusters }}
+---
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: {{ .metadata.name }}
+  labels:
+    cloud: 'AWS'
+    region: {{ .platform.aws.region }}
+    vendor: 'OpenShift'
+spec:
+  baseDomain: sandbox1250.opentlc.com
+  clusterName: {{ .metadata.name }}
+  controlPlaneConfig:
+    servingCertificates: {}
+  installed: false
+  platform:
+    aws:
+      credentialsSecretRef:
+        name: aws-creds
+      region: {{ .platform.aws.region }}
+  provisioning:
+    installConfigSecretRef:
+      name: {{ .metadata.name }}-install-config
+    sshPrivateKeySecretRef:
+      name: ssh-private-key
+    imageSetRef:
+      name: ocp4.4.0-x86-64 #quay.io/openshift-release-dev/ocp-release:4.4.0-x86_64
+  pullSecretRef:
+    name: docker-pull-secret
+{{- end }}    

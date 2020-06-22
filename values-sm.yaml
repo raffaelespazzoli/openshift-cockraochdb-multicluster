@@ -1,0 +1,16 @@
+submariner:
+  serviceDiscovery: true
+  clusterId: ${cluster_id}
+  token: ""
+  clusterCidr: ${cluster_cidr}
+  serviceCidr: ${cluster_service_cidr}
+broker:
+  type: k8s
+  server: ${broker_api}
+  token: test
+  namespace: submariner-broker
+  insecure: false
+  ca: | 
+${broker_ca}
+ipsec:
+  psk: ""    

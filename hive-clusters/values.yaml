@@ -1,0 +1,127 @@
+## these parameters must be passed:
+ssh_private_key: ""
+ssh_public_key: ""
+docker_pull_secret: ""
+aws_id: ""
+aws_key: ""
+
+## 
+
+clusters:
+  - apiVersion: v1
+    metadata:
+      name: raffa1
+    baseDomain: sandbox1250.opentlc.com
+    controlPlane:
+      hyperthreading: Enabled
+      name: master
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 4000
+            size: 100
+            type: io1
+          type: m5.xlarge
+    compute:
+    - hyperthreading: Enabled
+      name: worker
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 2000
+            size: 100
+            type: io1
+          type: m5.large
+    networking:
+      clusterNetwork:
+      - cidr: 10.128.0.0/14
+        hostPrefix: 23
+      machineCIDR: 10.0.0.0/16
+      networkType: OpenShiftSDN
+      serviceNetwork:
+      - 172.30.0.0/16
+    platform:
+      aws:
+        region: us-west-1
+    pullSecret: "" # skip, hive will inject based on it's secrets
+    sshKey: "" # set by helm
+  - apiVersion: v1
+    metadata:
+      name: raffa2
+    baseDomain: sandbox1250.opentlc.com
+    controlPlane:
+      hyperthreading: Enabled
+      name: master
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 4000
+            size: 100
+            type: io1
+          type: m5.xlarge
+    compute:
+    - hyperthreading: Enabled
+      name: worker
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 2000
+            size: 100
+            type: io1
+          type: m5.large
+    networking:
+      clusterNetwork:
+      - cidr: 10.132.0.0/14
+        hostPrefix: 23
+      machineCIDR: 10.1.0.0/16
+      networkType: OpenShiftSDN
+      serviceNetwork:
+      - 172.31.0.0/16
+    platform:
+      aws:
+        region: us-east-1
+    pullSecret: "" # skip, hive will inject based on it's secrets
+    sshKey: "" # set by helm
+  - apiVersion: v1
+    metadata:
+      name: raffa3
+    baseDomain: sandbox1250.opentlc.com
+    controlPlane:
+      hyperthreading: Enabled
+      name: master
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 4000
+            size: 100
+            type: io1
+          type: m5.xlarge
+    compute:
+    - hyperthreading: Enabled
+      name: worker
+      replicas: 3
+      platform:
+        aws:
+          rootVolume:
+            iops: 2000
+            size: 100
+            type: io1
+          type: m5.large
+    networking:
+      clusterNetwork:
+      - cidr: 10.136.0.0/14
+        hostPrefix: 23
+      machineCIDR: 10.2.0.0/16
+      networkType: OpenShiftSDN
+      serviceNetwork:
+      - 172.32.0.0/16
+    platform:
+      aws:
+        region: us-east-2
+    pullSecret: "" # skip, hive will inject based on it's secrets
+    sshKey: "" # set by helm

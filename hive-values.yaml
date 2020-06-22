@@ -1,0 +1,8 @@
+ssh_private_key: |
+${ssh_key}  
+ssh_public_key: | 
+  ${ssh_pub_key}
+docker_pull_secret: 
+  ${pull_secret}
+aws_id: ${aws_id}
+aws_key: ${aws_key}
